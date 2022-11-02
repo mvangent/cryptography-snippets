@@ -33,17 +33,31 @@ def transmit(cipher):
     
     return bytes(b)
 
+def tamper(cipher):
+    modified = [0] * len(cipher)
+
+    modified[10] = ord(' ') ^ ord('1')
+    modified[11] = ord(' ') ^ ord('0')
+    modified[12] = ord('1') ^ ord('0')
+    
+    return bytes([modified[i] ^ cipher[i] for i in range(len(cipher))])
+
 # This is Alice
 key = KeyStream(10)
-message = "Hello, World!"
+message = "Send Bob:   10 dollar"
 message = message.encode()
 cipher = encrypt(key, message)
-
+print(message)
+print(cipher)
 # This is the poor transmission
-cipher = transmit(cipher)
+# cipher = transmit(cipher)
 
-# This is Bob
+# This is Bob tampering
+cipher = tamper(cipher)
+
+# This is the bank
 key = KeyStream(10)
 message = encrypt(key, cipher)
+print(cipher)
 print(message)
 
