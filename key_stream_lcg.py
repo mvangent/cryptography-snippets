@@ -42,6 +42,14 @@ def tamper(cipher):
     
     return bytes([modified[i] ^ cipher[i] for i in range(len(cipher))])
 
+def get_key(message, cipher):
+    return bytes([message[i] ^ cipher[i] for i in range(len(message))])
+
+def crack(key_stream, cipher):
+    length = min(len(key_stream), len(cipher)) 
+
+    return bytes([key_stream[i] ^ cipher[i] for i in range(length)])
+
 # This is Alice
 key = KeyStream(10)
 message = "Send Bob:   10 dollar"
@@ -61,3 +69,34 @@ message = encrypt(key, cipher)
 print(cipher)
 print(message)
 
+
+print("----- PROBLEM OF REUSED KEYS -----")
+
+# Eve goes to Alice
+eves_message = "This is Eve's Most Top Secret".encode()
+
+# This is Alice 
+key_alice = KeyStream(11)
+message_alice = eves_message
+
+print(message_alice)
+cipher_alice = encrypt(key_alice, message_alice)
+
+# This is Eve again
+eves_key_stream = get_key(eves_message, cipher_alice)
+
+# Here is Bob
+key_bob = KeyStream(11)
+message_bob = encrypt(key_bob, cipher_alice)
+print(message_bob)
+
+# Back to Alice 
+top_secret_alice = "Family fortune location on the treasure map coordinates".encode()
+print(top_secret_alice)
+
+cipher_alice_top_secret = encrypt(KeyStream(11), top_secret_alice)
+
+# Eve intercepts the cipher of this top secret and decrypts
+eves_decryption = crack(eves_key_stream, cipher_alice_top_secret)
+
+print(eves_decryption)
