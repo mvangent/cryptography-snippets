@@ -1,3 +1,5 @@
+import random
+
 class KeyStream:
     def __init__(self, key=1):
         self.next = key
@@ -13,7 +15,7 @@ class KeyStream:
         return self.next
 
     def get_key_byte(self):
-        return self.rand() % 256
+        return (self.rand()//2**23) % 2**8
         
 
 
@@ -91,12 +93,39 @@ message_bob = encrypt(key_bob, cipher_alice)
 print(message_bob)
 
 # Back to Alice 
-top_secret_alice = "Family fortune location on the treasure map coordinates".encode()
+header = "MESSAGE: "
+top_secret_alice = (header + "Family fortune location on the treasure map coordinates").encode()
 print(top_secret_alice)
 
-cipher_alice_top_secret = encrypt(KeyStream(11), top_secret_alice)
+rand_seed = random.randrange(0, 2**31)
+
+cipher_alice_top_secret = encrypt(KeyStream(2147483648 - 1), top_secret_alice)
 
 # Eve intercepts the cipher of this top secret and decrypts
 eves_decryption = crack(eves_key_stream, cipher_alice_top_secret)
-
 print(eves_decryption)
+
+print("----- BRUTE FORCE ATTACKS ON STREAM CIPHERS-----")
+
+def brute_force(plain, cipher):
+    for k in range(2**31):
+        key = KeyStream(k)
+
+        for i in range(len(plain)):
+            if key.get_key_byte() != cipher[i] ^ plain[i]:
+                break
+        else:
+            return k
+
+    return False
+
+
+
+
+# Eve's brute force attack
+brute_forced_key = brute_force(header.encode(), cipher_alice_top_secret)
+print("KEY: ", brute_forced_key) 
+brute_forced_message = encrypt(KeyStream(brute_forced_key), cipher_alice_top_secret)
+
+print(brute_forced_message)
+
