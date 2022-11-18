@@ -34,9 +34,10 @@ def get_d(e, lambda_n):
 
 # Key Generation by Alice
 ## Step 1: Generate two uniqe primes
-size = 3000
+size = 300
 p = get_prime(size)
 q = get_prime(size, [p])
+print("p ", p, "and q ", q)
 ## Step 2: Compute n 
 n = p * q
 ## Step 3: Compute lambda(n). Given n = pq, λ(n) = lcm(λ(p), λ(q)), and since p and q are prime, λ(p) = φ(p) = p − 1, and likewise λ(q) = q − 1. Hence λ(n) = lcm(p − 1, q − 1)
@@ -59,4 +60,26 @@ m = c**d % n
 # Alice decrypting Bob's message
 print("Decrypted by Alice = ", m)
 
+# Eve sees the following
+print("Eve sees (e ", e, ", n ", n, ", c ", c, " )")
 
+def factor(n):
+    for p in range(2, n):
+        if n % p == 0:
+            return p, n//p
+    else:
+        return None, None
+
+p, q = factor(n)
+
+print("Factors ", p, q)
+
+if q == None or p == None:
+    raise ValueError("q and p have to be Numbers") 
+
+lambda_n = lcm(p-1, q-1)
+
+e = get_e(lambda_n)
+d = get_d(e, lambda_n)
+
+print("Eve hacking it", c**d % n)
