@@ -83,3 +83,12 @@ e = get_e(lambda_n)
 d = get_d(e, lambda_n)
 
 print("Eve hacking it", c**d % n)
+
+
+# Naieve, unrecommended implementation of encrypting short messages
+message = "Alice is awesome"
+
+for char in message:
+    c = ord(char)**e % n
+    print(c, " ", end='')
+print()
